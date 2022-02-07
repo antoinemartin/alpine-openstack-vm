@@ -67,7 +67,8 @@ jobs:
           echo -e "${{ secrets.TERRAFORM_VARS }}" | openssl base64 -d -A > terraform.tfvars
           terraform init
           terraform apply -auto-approve
-          echo "::set-output name=instance_ipv4::$(terraform output -raw instance_ipv4)\n"
+          echo "::set-output name=instance_ipv4::$(terraform output -raw instance_ipv4)"
+          echo ""
       - name: Test connectivity of the server
         uses: appleboy/ssh-action@master
         with:
