@@ -1,0 +1,77 @@
+name: CI
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install qemu-utils
+        run: |
+          sudo apt-get update
+          sudo apt-get install qemu-utils
+
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          wget https://raw.githubusercontent.com/alpinelinux/alpine-make-vm-image/v0.8.0/alpine-make-vm-image \
+            && echo 'ddf44e4132a32e762cd0ae46e12c0122c5c18877  alpine-make-vm-image' | sha1sum -c \
+            || exit 1
+          chmod +x ./alpine-make-vm-image
+          sudo ./alpine-make-vm-image \
+              --image-format qcow2 \
+              --image-size 1G \
+              --repositories-file openstack/repositories \
+              --packages "$(cat openstack/packages)" \
+              --script-chroot \
+              alpine-openstack.qcow2 -- ./openstack/configure.sh
+          sha256sum alpine-openstack.qcow2 | cut -d' ' -f 1 > alpine-openstack.qcow2.sha256
+      - name: Upload root fs artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: alpine-openstack.qcow2
+          path: "${{ github.workspace }}/alpine-openstack.qcow2"
+      - name: Make Development release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            alpine-openstack.qcow2
+            alpine-openstack.qcow2.sha256
+  test-image:
+    name: Test produced image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hashicorp/setup-terraform@v1
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: alpine-openstack.qcow2
+      - name: Apply plan
+        run: |
+          cd terraform
+          echo -e "${{ secrets.TERRAFORM_VARS }}" | openssl base64 -d -A > terraform.tfvars
+          terraform init
+          terraform apply -auto-approve
+      - name: Test connectivity of the server
+        uses: appleboy/ssh-action@master
+        with:
+          host: newlpine.kaweezle.com
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            apk update && apk upgrade
+      - name: Destroy the test VM
+        run: |
+          cd terraform
+          terraform state rm openstack_images_image_v2.alpine
+          terraform destroy -auto-approve

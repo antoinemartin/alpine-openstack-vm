@@ -1,0 +1,10 @@
+less
+logrotate
+openssh
+chrony
+sudo
+cloud-init
+acpi
+e2fsprogs-extra
+zsh
+oh-my-zsh
