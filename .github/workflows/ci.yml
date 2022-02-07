@@ -59,17 +59,18 @@ jobs:
         with:
           name: alpine-openstack.qcow2
       - name: Apply plan
-        id: terraform
+        id: apply_plan
         run: |
           cd terraform
           echo -e "${{ secrets.TERRAFORM_VARS }}" | openssl base64 -d -A > terraform.tfvars
           terraform init
           terraform apply -auto-approve
-          echo "::set-output name=instance_ipv4::$(terraform output -raw instance_ipv4)\n"
+          terraform output -raw instance_ipv4
+          echo "::set-output name=instance_ipv4::$(terraform output -raw instance_ipv4)"
       - name: Test connectivity of the server
         uses: appleboy/ssh-action@master
         with:
-          host: "${{ steps.terraform.outputs.instance_ipv4 }}"
+          host: ${{ steps.apply_plan.outputs.instance_ipv4 }}
           username: root
           key: ${{ secrets.SSH_KEY }}
           script: |
