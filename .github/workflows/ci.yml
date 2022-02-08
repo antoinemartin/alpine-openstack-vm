@@ -69,11 +69,13 @@ jobs:
           terraform apply -auto-approve
           echo "::set-output name=instance_ipv4::$(terraform output -raw instance_ipv4)"
           echo ""
+          sleep 20
       - name: Test connectivity of the server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ steps.apply_plan.outputs.instance_ipv4 }}
           username: root
+          debug: true
           key: ${{ secrets.SSH_KEY }}
           script: |
             apk update && apk upgrade

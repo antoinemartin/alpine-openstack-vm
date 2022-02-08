@@ -14,11 +14,6 @@ resource "openstack_images_image_v2" "alpine" {
   //   properties = {
   //     key = "value"
   //   }
-
-  lifecycle {
-    prevent_destroy       = true
-    create_before_destroy = true
-  }
 }
 
 # Création d'une instance
