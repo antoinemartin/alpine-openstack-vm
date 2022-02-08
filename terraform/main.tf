@@ -36,3 +36,18 @@ resource "ovh_domain_zone_record" "alpine" {
   ttl       = "60"
   target    = openstack_compute_instance_v2.alpine.network.0.fixed_ip_v4
 }
+
+resource "null_resource" "waitssh" {
+  provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      host        = openstack_compute_instance_v2.alpine.network.0.fixed_ip_v4
+      user        = "root"
+      private_key = var.instance_key
+      timeout     = "1m"
+    }
+
+    inline = ["echo 'connected!'"]
+  }
+
+}

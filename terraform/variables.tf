@@ -19,6 +19,11 @@ variable "instance_key_name" {
   description = "Key name to use to spawn image"
 }
 
+variable "instance_key" {
+  type        = string
+  description = "Key name to use to spawn image"
+}
+
 variable "openstack_username" {
   type        = string
   description = "Openstack username"

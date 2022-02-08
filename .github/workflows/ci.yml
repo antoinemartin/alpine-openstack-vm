@@ -69,7 +69,6 @@ jobs:
           terraform apply -auto-approve
           echo "::set-output name=instance_ipv4::$(terraform output -raw instance_ipv4)"
           echo ""
-          sleep 20
       - name: Test connectivity of the server
         uses: appleboy/ssh-action@master
         with:
