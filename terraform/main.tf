@@ -3,6 +3,7 @@
 //   name       = "alpine"
 // }
 
+// Create new image from current
 resource "openstack_images_image_v2" "alpine" {
   provider         = openstack.ovh
   name             = "alpine-openstack"
@@ -11,12 +12,13 @@ resource "openstack_images_image_v2" "alpine" {
   disk_format      = "qcow2"
   visibility       = "private"
 
+  // TODO: Put information about the build here
   //   properties = {
   //     key = "value"
   //   }
 }
 
-# Création d'une instance
+// Create instance from the image
 resource "openstack_compute_instance_v2" "alpine" {
   name        = var.instance_name
   provider    = openstack.ovh
@@ -29,6 +31,7 @@ resource "openstack_compute_instance_v2" "alpine" {
   }
 }
 
+// Create DNS entry. Cannot be used for testing because of propagation times.
 resource "ovh_domain_zone_record" "alpine" {
   zone      = var.instance_dns_zone
   subdomain = var.instance_name
@@ -37,6 +40,7 @@ resource "ovh_domain_zone_record" "alpine" {
   target    = openstack_compute_instance_v2.alpine.network.0.fixed_ip_v4
 }
 
+// Wait for SSH to be available on resource
 resource "null_resource" "waitssh" {
   provisioner "remote-exec" {
     connection {

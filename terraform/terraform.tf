@@ -12,14 +12,8 @@ terraform {
 }
 
 provider "openstack" {
-  auth_url            = "https://auth.cloud.ovh.net/v3"
-  user_name           = var.openstack_username
-  password            = var.openstack_password
-  project_domain_name = "Default"
-  user_domain_name    = "Default"
-  tenant_id           = var.openstack_tenant_id
-  region              = var.openstack_region
-  alias               = "ovh"
+  // Configured through the OS_CLOUD variable
+  alias = "ovh"
 }
 
 provider "ovh" {

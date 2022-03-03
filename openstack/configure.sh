@@ -26,10 +26,16 @@ EOF
 step 'Set cloud configuration'
 sed -e '/disable_root:/ s/true/false/' \
 	-e '/ssh_pwauth:/ s/0/no/' \
-    -e '/name: alpine/a \     passwd: $6$f/s5NNuDU2omItlc$uufEZ8h47YbnAY07PqO.J/sU0QVLMDZZmjJxw06t5pcS3x76IB61JXPbvqY8E2IiAGqUmNC4B6mbHnmbtu.qq1' \
+    -e '/name: alpine/a \     passwd: "*"' \
     -e '/lock_passwd:/ s/True/False/' \
     -e '/shell:/ s#/bin/ash#/bin/zsh#' \
     -i /etc/cloud/cloud.cfg
+
+# To have oh-my-zsh working on first boot
+cat >> /etc/cloud/cloud.cfg <<EOF
+runcmd:
+    - su alpine -l -c 'cp -f /usr/share/oh-my-zsh/templates/zshrc.zsh-template /home/alpine/.zshrc'
+EOF
 
 step 'Allow only key based ssh login'
 sed -e '/PermitRootLogin yes/d' \
@@ -64,3 +70,5 @@ rc-update add networking boot
 rc-update add termencoding boot
 rc-update add sshd default
 rc-update add cloud-init default
+rc-update add cloud-config default
+rc-update add cloud-final default
