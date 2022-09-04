@@ -1,0 +1,3 @@
+#cloud-config
+runcmd:
+    - su alpine -l -c 'cp -f /usr/share/oh-my-zsh/templates/zshrc.zsh-template /home/alpine/.zshrc'

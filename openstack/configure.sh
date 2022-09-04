@@ -32,10 +32,7 @@ sed -e '/disable_root:/ s/true/false/' \
     -i /etc/cloud/cloud.cfg
 
 # To have oh-my-zsh working on first boot
-cat >> /etc/cloud/cloud.cfg <<EOF
-runcmd:
-    - su alpine -l -c 'cp -f /usr/share/oh-my-zsh/templates/zshrc.zsh-template /home/alpine/.zshrc'
-EOF
+cat cloud-config.yaml >> /etc/cloud/cloud.cfg
 
 step 'Allow only key based ssh login'
 sed -e '/PermitRootLogin yes/d' \
