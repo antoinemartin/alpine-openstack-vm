@@ -8,3 +8,5 @@ acpi
 e2fsprogs-extra
 zsh
 oh-my-zsh
+py3-pyserial
+py3-netifaces
