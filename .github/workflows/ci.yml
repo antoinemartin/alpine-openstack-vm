@@ -14,9 +14,9 @@ jobs:
       - name: Install qemu-utils
         run: |
           sudo apt-get update
-          sudo apt-get install qemu-utils
+          sudo apt-get install qemu-utils genisoimage
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Build image
         run: |
@@ -31,12 +31,22 @@ jobs:
               --packages "$(cat openstack/packages)" \
               --script-chroot \
               alpine-openstack.qcow2 -- ./openstack/configure.sh
-          sha256sum alpine-openstack.qcow2 | cut -d' ' -f 1 > alpine-openstack.qcow2.sha256
-      - name: Upload root fs artifact
-        uses: actions/upload-artifact@v2
+          sha256sum alpine-openstack.qcow2 > SHA256SUMS
+          qemu-img convert alpine-openstack.qcow2 -O vhdx -o subformat=dynamic alpine-openstack.vhdx
+          (cd nocloud; genisoimage  -output ../seed.iso -volid cidata -joliet -rock user-data meta-data; )
+          sha256sum alpine-openstack.vhdx seed.iso >> SHA256SUMS
+      - name: Upload QCOW2 root fs artifact
+        uses: actions/upload-artifact@v3
         with:
           name: alpine-openstack.qcow2
           path: "${{ github.workspace }}/alpine-openstack.qcow2"
+      - name: Upload VHDX root fs artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: alpine-openstack.vhdx
+          path: |
+            alpine-openstack.vhdx
+            seed.iso
       - name: Make Development release
         uses: "marvinpinto/action-automatic-releases@latest"
         if: ${{ github.ref == 'refs/heads/main' }}
@@ -47,7 +57,9 @@ jobs:
           title: "Development Build"
           files: |
             alpine-openstack.qcow2
-            alpine-openstack.qcow2.sha256
+            alpine-openstack.vhdx
+            seed.iso
+            SHA256SUMS
   test-image:
     name: Test produced image
     runs-on: ubuntu-latest
@@ -56,11 +68,11 @@ jobs:
       - uses: hashicorp/setup-terraform@v1
         with:
           terraform_wrapper: false
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
         with:
           name: alpine-openstack.qcow2
       - name: Apply plan
@@ -72,8 +84,7 @@ jobs:
           echo -e "${{ secrets.TERRAFORM_VARS }}" | openssl base64 -d -A > terraform.tfvars
           terraform init
           terraform apply -auto-approve
-          echo "::set-output name=instance_ipv4::$(terraform output -raw instance_ipv4)"
-          echo ""
+          echo "instance_ipv4=$(terraform output -raw instance_ipv4)" >> $GITHUB_OUTPUT
         env:
           OS_CLOUD: openstack
       - name: Test connectivity of the server
