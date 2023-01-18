@@ -31,12 +31,19 @@ jobs:
               --packages "$(cat openstack/packages)" \
               --script-chroot \
               alpine-openstack.qcow2 -- ./openstack/configure.sh
-          sha256sum alpine-openstack.qcow2 | cut -d' ' -f 1 > alpine-openstack.qcow2.sha256
-      - name: Upload root fs artifact
+          sha256sum alpine-openstack.qcow2 > SHA256SUMS
+          qemu-img convert alpine-openstack.qcow2 -O vhdx -o subformat=dynamic alpine-openstack.vhdx
+          sha256sum alpine-openstack.vhdx >> SHA256SUMS
+      - name: Upload QCOW2 root fs artifact
         uses: actions/upload-artifact@v3
         with:
           name: alpine-openstack.qcow2
           path: "${{ github.workspace }}/alpine-openstack.qcow2"
+      - name: Upload VHDX root fs artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: alpine-openstack.vhdx
+          path: "${{ github.workspace }}/alpine-openstack.vhdx"
       - name: Make Development release
         uses: "marvinpinto/action-automatic-releases@latest"
         if: ${{ github.ref == 'refs/heads/main' }}
@@ -47,7 +54,8 @@ jobs:
           title: "Development Build"
           files: |
             alpine-openstack.qcow2
-            alpine-openstack.qcow2.sha256
+            alpine-openstack.vhdx
+            SHA256SUMS
   test-image:
     name: Test produced image
     runs-on: ubuntu-latest
@@ -72,8 +80,7 @@ jobs:
           echo -e "${{ secrets.TERRAFORM_VARS }}" | openssl base64 -d -A > terraform.tfvars
           terraform init
           terraform apply -auto-approve
-          echo "::set-output name=instance_ipv4::$(terraform output -raw instance_ipv4)"
-          echo ""
+          echo "instance_ipv4=$(terraform output -raw instance_ipv4)" >> $GITHUB_OUTPUT
         env:
           OS_CLOUD: openstack
       - name: Test connectivity of the server
