@@ -1,3 +1,9 @@
+variable "image_name" {
+  type        = string
+  description = "Image name"
+  default     = "alpine-openstack"
+}
+
 variable "instance_name" {
   type        = string
   description = "instance name"

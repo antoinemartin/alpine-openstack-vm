@@ -1,0 +1,30 @@
+#cloud-config
+ssh_authorized_keys:
+    - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBA2HxRe/v381OzkHwVb56IT4bF+1LIDzZxeYnAXmAvx2Xkcoz0YmVrnZR7y/dHxQDXI29hapoVPVQg8wkQMGFMw= AntoineMARTIN@MacAMartin.local
+
+write_files:
+    - path: /etc/iknite.d/iknite.yaml
+      owner: "root:root"
+      permissions: "0640"
+      defer: true
+      content: |
+          cluster:
+            ip: 192.168.99.2
+            create_ip: true
+            kubernetes_version: "1.26.0"
+            domain_name: kwsl.local
+            network_interface: eth0
+            enable_mdns: true
+
+runcmd:
+    - install -o alpine -g alpine /usr/share/oh-my-zsh/templates/zshrc.zsh-template /home/alpine/.zshrc
+    - grep -q kaweezle /etc/apk/repositories || echo "https://kaweezle.com/repo/" >> /etc/apk/repositories
+    - test -f /etc/apk/keys/kaweezle-devel@kaweezle.com-c9d89864.rsa.pub || wget -q -P /etc/apk/keys https://github.com/kaweezle/iknite/releases/latest/download/kaweezle-devel@kaweezle.com-c9d89864.rsa.pub
+    - /sbin/apk --update-cache add iknite
+    - rc-update add iknite-config default
+
+final_message: "The system is finally up, after $UPTIME seconds"
+power_state:
+    mode: reboot
+    message: Bye Bye Bye
+    timeout: 1800

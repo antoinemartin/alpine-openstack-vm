@@ -1,7 +1,3 @@
 #cloud-config
 runcmd:
     - su alpine -l -c 'cp -f /usr/share/oh-my-zsh/templates/zshrc.zsh-template /home/alpine/.zshrc'
-    - grep -q kaweezle /etc/apk/repositories || echo "https://kaweezle.com/repo/" >> /etc/apk/repositories
-    - test -f /etc/apk/keys/kaweezle-devel@kaweezle.com-c9d89864.rsa.pub || wget -q -P /etc/apk/keys https://github.com/kaweezle/iknite/releases/latest/download/kaweezle-devel@kaweezle.com-c9d89864.rsa.pub
-    - /sbin/apk --update-cache add iknite
-    - su root -l -c '/sbin/iknite -v info start'

@@ -4,13 +4,24 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      image_name:
+        description: "Name of the image to build"
+        required: true
+        default: alpine-openstack
+        type: string
 
 jobs:
   build:
     name: Build image
     runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: ${{ github.event.inputs.image_name }}
     steps:
+      - name: Set default image name
+        if: env.IMAGE_NAME == null
+        run: echo "IMAGE_NAME=alpine-openstack" >> $GITHUB_ENV
       - name: Install qemu-utils
         run: |
           sudo apt-get update
@@ -63,8 +74,13 @@ jobs:
   test-image:
     name: Test produced image
     runs-on: ubuntu-latest
+    env:
+      TF_VAR_image_name: ${{ github.event.inputs.image_name }}
     needs: build
     steps:
+      - name: Set default image name
+        if: env.TF_VAR_image_name == null
+        run: echo "TF_VAR_image_name=alpine-openstack" >> $GITHUB_ENV
       - uses: hashicorp/setup-terraform@v1
         with:
           terraform_wrapper: false
@@ -99,9 +115,9 @@ jobs:
       - name: Save working image
         run: |
           python -m pip install python-openstackclient
-          openstack image delete alpine-openstack-backup || /bin/true
-          openstack image set --name alpine-openstack-backup alpine-openstack-latest || /bin/true
-          openstack image set --name alpine-openstack-latest alpine-openstack
+          openstack image delete ${TF_VAR_image_name}-backup || /bin/true
+          openstack image set --name ${TF_VAR_image_name}-backup ${TF_VAR_image_name}-latest || /bin/true
+          openstack image set --name ${TF_VAR_image_name}-latest ${TF_VAR_image_name}
         env:
           OS_CLOUD: openstack
       - name: Destroy the test VM
