@@ -14,7 +14,7 @@ jobs:
       - name: Install qemu-utils
         run: |
           sudo apt-get update
-          sudo apt-get install qemu-utils
+          sudo apt-get install qemu-utils genisoimage
 
       - uses: actions/checkout@v3
 
@@ -33,7 +33,8 @@ jobs:
               alpine-openstack.qcow2 -- ./openstack/configure.sh
           sha256sum alpine-openstack.qcow2 > SHA256SUMS
           qemu-img convert alpine-openstack.qcow2 -O vhdx -o subformat=dynamic alpine-openstack.vhdx
-          sha256sum alpine-openstack.vhdx >> SHA256SUMS
+          (cd nocloud; genisoimage  -output ../seed.iso -volid cidata -joliet -rock user-data meta-data; )
+          sha256sum alpine-openstack.vhdx seed.iso >> SHA256SUMS
       - name: Upload QCOW2 root fs artifact
         uses: actions/upload-artifact@v3
         with:
@@ -43,7 +44,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: alpine-openstack.vhdx
-          path: "${{ github.workspace }}/alpine-openstack.vhdx"
+          path: |
+            alpine-openstack.vhdx
+            seed.iso
       - name: Make Development release
         uses: "marvinpinto/action-automatic-releases@latest"
         if: ${{ github.ref == 'refs/heads/main' }}
@@ -55,6 +58,7 @@ jobs:
           files: |
             alpine-openstack.qcow2
             alpine-openstack.vhdx
+            seed.iso
             SHA256SUMS
   test-image:
     name: Test produced image

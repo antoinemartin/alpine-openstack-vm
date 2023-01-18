@@ -62,6 +62,11 @@ cp -f /usr/share/oh-my-zsh/templates/zshrc.zsh-template /root/.zshrc
 chmod +x /root/.zshrc
 sed -ie '/^root:/ s#:/bin/.*$#:/bin/zsh#' /etc/passwd
 
+# see https://gitlab.alpinelinux.org/alpine/aports/-/issues/8861
+step 'Enable cloud-init configuration via NoCloud iso image'
+
+echo "iso9660" >> /etc/filesystems
+
 step 'Enable services'
 rc-update add acpid default
 rc-update add chronyd default
