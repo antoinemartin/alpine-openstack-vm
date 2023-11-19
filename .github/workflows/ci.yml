@@ -16,12 +16,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install qemu-utils genisoimage
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build image
         run: |
-          wget https://raw.githubusercontent.com/alpinelinux/alpine-make-vm-image/v0.8.0/alpine-make-vm-image \
-            && echo 'ddf44e4132a32e762cd0ae46e12c0122c5c18877  alpine-make-vm-image' | sha1sum -c \
+          wget https://raw.githubusercontent.com/alpinelinux/alpine-make-vm-image/v0.12.0/alpine-make-vm-image \
+            && echo '75aafcb883155bcaad9ad0dadb3e22e082152c1e  alpine-make-vm-image' | sha1sum -c \
             || exit 1
           chmod +x ./alpine-make-vm-image
           sudo ./alpine-make-vm-image \
@@ -65,13 +65,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: hashicorp/setup-terraform@v1
+      - uses: hashicorp/setup-terraform@v3
         with:
           terraform_wrapper: false
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
-      - uses: actions/checkout@v3
+          python-version: "3.11"
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v3
         with:
           name: alpine-openstack.qcow2
