@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# cSpell: words nocloud genisoimage volid cidata subformat
 set -eu
 
 rm -rf build
@@ -8,8 +9,8 @@ cd build
 CLOUD_CONFIG_FILE=${1:-cloud-config.yaml}
 echo "Using cloud config file: $CLOUD_CONFIG_FILE"
 
-wget https://raw.githubusercontent.com/alpinelinux/alpine-make-vm-image/v0.13.2/alpine-make-vm-image \
-&& echo '2720b23e4c65aff41a3ab781a26467b66985c526  alpine-make-vm-image' | sha1sum -c \
+wget https://raw.githubusercontent.com/alpinelinux/alpine-make-vm-image/v0.13.3/alpine-make-vm-image \
+&& echo 'f17ef4997496ace524a8e8e578d944f3552255bb  alpine-make-vm-image' | sha1sum -c \
 || exit 1
 chmod +x ./alpine-make-vm-image
 
@@ -35,5 +36,3 @@ sha256sum alpine-openstack.qcow2 > SHA256SUMS
 qemu-img convert alpine-openstack.qcow2 -O vhdx -o subformat=dynamic alpine-openstack.vhdx
 (cd ../nocloud; genisoimage  -output ../build/seed.iso -volid CIDATA -joliet -rock user-data meta-data; )
 sha256sum alpine-openstack.vhdx seed.iso >> SHA256SUMS
-
-

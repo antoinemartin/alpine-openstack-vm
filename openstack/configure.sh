@@ -1,5 +1,5 @@
 #!/bin/sh
-
+# cSpell: words iface pwauth zshrc ohmyzsh autosuggestions p10k powerlevel10k atsg acpid chronyd crond termencoding
 _step_counter=0
 step() {
 	_step_counter=$(( _step_counter + 1 ))
@@ -60,16 +60,18 @@ step 'Enabling zsh'
 # Install ZSH pimp tools
 P10K_DIR="/usr/share/oh-my-zsh/custom/themes/powerlevel10k"
 if [ ! -d "$P10K_DIR" ]; then
-    wget -q https://github.com/romkatv/powerlevel10k/archive/refs/tags/v1.20.0.tar.gz -O /tmp/p10k.tar.gz
+    LATEST_P10K_VERSION=$(wget -qO- https://api.github.com/repos/romkatv/powerlevel10k/releases/latest | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+    wget -q https://github.com/romkatv/powerlevel10k/archive/refs/tags/v$LATEST_P10K_VERSION.tar.gz -O /tmp/p10k.tar.gz
     tar xzf /tmp/p10k.tar.gz -C /tmp
-    mv /tmp/powerlevel10k-1.20.0 "$P10K_DIR"
+    mv /tmp/powerlevel10k-$LATEST_P10K_VERSION "$P10K_DIR"
     rm /tmp/p10k.tar.gz
 fi
 ATSG_DIR="/usr/share/oh-my-zsh/custom/plugins/zsh-autosuggestions"
 if [ ! -d "$ATSG_DIR" ]; then
-    wget -q https://github.com/zsh-users/zsh-autosuggestions/archive/refs/tags/v0.7.1.tar.gz -O /tmp/atsg.tar.gz
+    LATEST_ATSG_VERSION="0.7.1"
+    wget -q https://github.com/zsh-users/zsh-autosuggestions/archive/refs/tags/v$LATEST_ATSG_VERSION.tar.gz -O /tmp/atsg.tar.gz
     tar xzf /tmp/atsg.tar.gz -C /tmp
-    mv /tmp/zsh-autosuggestions-0.7.1 "$ATSG_DIR"
+    mv /tmp/zsh-autosuggestions-$LATEST_ATSG_VERSION "$ATSG_DIR"
     rm /tmp/atsg.tar.gz
 fi
 
