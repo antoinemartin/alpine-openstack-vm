@@ -1,7 +1,9 @@
+<!-- cSpell: words myflavor mykey passw0rd -->
+
 # Alpine Openstack Virtual Machine
 
-This project helps creating an [Alpine] based Openstack image.
-It uses The [alpine-make-vm-image] script to build a disk image in QCOW2 format.
+This project helps creating an [Alpine] based Openstack image. It uses The
+[alpine-make-vm-image] script to build a disk image in QCOW2 format.
 
 This image can then be uploaded to an openstack project with the following
 command:
@@ -27,9 +29,9 @@ image that can be started with Hyper-V on Windows. Its name is
 `alpine-openstack.vhdx`.
 
 To be able to run it on Windows without a metadata service, a small
-[NoCloud](https://cloudinit.readthedocs.io/en/18.4/topics/datasources/nocloud.html) ISO
-image `seed.iso` is provided. It allows connecting to the VM through SSH with
-the password `passw0rd` (username `alpine`).
+[NoCloud](https://cloudinit.readthedocs.io/en/18.4/topics/datasources/nocloud.html)
+ISO image `seed.iso` is provided. It allows connecting to the VM through SSH
+with the password `passw0rd` (username `alpine`).
 
 You can create the VM with:
 
@@ -38,6 +40,9 @@ PS> Resize-VHD -Path .\alpine-openstack.vhdx -SizeBytes 20GB
 PS> New-VM -Name debug -MemoryStartupBytes 2GB -Path . -BootDevice VHD -VHDPath .\alpine-openstack.vhdx -SwitchName "Default Switch" -Generation 1
 PS> Set-VMDvdDrive -VMName debug -Path .\seed.iso
 PS> Start-VM debug
+```
+
+```powershell
 PS> Get-NetNeighbor -State Reachable -LinkLayerAddress 00-15-5d-*
 
 ifIndex IPAddress             LinkLayerAddress      State       PolicyStore
@@ -61,7 +66,26 @@ You may change this message by editing /etc/motd.
 PS>
 ```
 
-More information on [this blog post](https://mrtn.me/posts/2023/01/13/debugging-a-failing-openstack-image/).
+More information on
+[this blog post](https://mrtn.me/posts/2023/01/13/debugging-a-failing-openstack-image/).
+
+To automate the VM creation process, you can use the
+[`Start-DebugVM.ps1`](hack/Start-DebugVM.ps1) script located in the `hack/`
+directory. This PowerShell script resizes the VHDX to 20GB, creates a new
+Hyper-V VM with the specified name, attaches the ISO, starts the VM, and waits
+for SSH availability on port 22. It then outputs the IP address for SSH
+connection.
+
+```console
+PS> .\hack\Start-DebugVM.ps1 -VMName debug
+Starting debug VM 'debug' with VHDX '.\alpine-openstack.vhdx' and ISO '.\seed.iso'
+Resizing VHD to 20GB...
+Creating and starting VM...
+Waiting for VM to become accessible via SSH...
+  Checking for VM IP address and SSH availability...
+  Checking for VM IP address and SSH availability...
+Connect with: ssh alpine@172.29.169.255
+```
 
 <!-- MARKDOWN LINKS & IMAGES -->
 

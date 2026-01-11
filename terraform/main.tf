@@ -41,7 +41,7 @@ resource "ovh_domain_zone_record" "alpine" {
 }
 
 // Wait for SSH to be available on resource
-resource "null_resource" "waitssh" {
+resource "null_resource" "wait_ssh" {
   provisioner "remote-exec" {
     connection {
       type        = "ssh"

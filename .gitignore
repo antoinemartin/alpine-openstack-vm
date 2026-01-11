@@ -10,3 +10,4 @@ alpine-make-vm-image
 seed.iso
 SHA256SUMS
 build/
+.env/

@@ -1,0 +1,19 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "ignorePaths": [],
+  "dictionaryDefinitions": [],
+  "dictionaries": ["bash", "softwareTerms", "terraform"],
+  "words": [
+    "azerty",
+    "doas",
+    "fieldtype",
+    "keypair",
+    "nocloud",
+    "pipx",
+    "QCOW",
+    "vhdx"
+  ],
+  "ignoreWords": [],
+  "import": []
+}

@@ -9,6 +9,13 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.{adoc,yml}]
+[*.{yml}]
 indent_size = 2
 indent_style = space
+
+[*.md]
+indent_size = 2
+max_line_length = 80
+
+[*.{yml,yaml,toml,html,css,scss,json,ts,tsx}]
+indent_size = 2
