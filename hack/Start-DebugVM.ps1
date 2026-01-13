@@ -51,6 +51,10 @@ if (-not $CheckOnly) {
     Resize-VHD -Path $VHDXPath -SizeBytes 20GB
     Write-Host "Creating and starting VM..."
     $null = New-VM -Name $VMName -MemoryStartupBytes 2GB -Path . -BootDevice VHD -VHDPath $VHDXPath -SwitchName "Default Switch" -Generation 1
+    # Increase the number of processors to 2 for better performance
+    Set-VMProcessor -VMName $VMName -Count 2
+    # Set max memory to 12GB
+    Set-VMMemory -VMName $VMName -DynamicMemoryEnabled $true -MinimumBytes 2GB -MaximumBytes 12GB
     Set-VMDvdDrive -VMName $VMName -Path $ISOPath
     Start-VM $VMName
 } else {
